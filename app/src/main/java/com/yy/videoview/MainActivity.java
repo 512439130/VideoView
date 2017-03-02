@@ -1,31 +1,59 @@
 package com.yy.videoview;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yy.videoview.videoview.YyVideoView;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static java.security.AccessController.getContext;
+
 
 public class MainActivity extends Activity {
     private YyVideoView mVideoView;
 
-    //控制视频相关
+    //控制视频相关（播放，暂停，继续）
     private ImageView startImageView;
     private ImageView stopImageView;
     private ImageView allImageView;
+
+    //控制视频相关（快进，声音，亮度）
+    private ImageView voiceImageView;  //声音
+    private ImageView brightnessImageView;  //亮度
+    private ImageView speedImageView; //快进
+    private ImageView rewindImageView; //快退
+    private TextView iconTextView;
+    private TextView timeTextView;
+
+    //手指按下的点为(x1, y1)手指离开屏幕的点为(x2, y2)
+    float x1 = 0;
+    float x2 = 0;
+    float y1 = 0;
+    float y2 = 0;
+
+
+    private boolean leftFlag = false;  //左边滑动标示
+    private boolean rightFlag = false;  //右边滑动标示
 
     private static SeekBar mSeekBar;
 
@@ -44,6 +72,11 @@ public class MainActivity extends Activity {
     private int currentPosition = 0;  //记录当前播放进度
 
     private Timer timer;
+
+
+    //屏幕宽高
+    private int screenWidth;
+    private int screenHeight;
 
 
     private static Handler handler = new Handler() {
@@ -72,11 +105,23 @@ public class MainActivity extends Activity {
 
     private void initView() {
         mVideoView = (YyVideoView) findViewById(R.id.id_vv_videoview);
-
         startImageView = (ImageView) findViewById(R.id.id_iv_start);
         stopImageView = (ImageView) findViewById(R.id.id_iv_stop);
         allImageView = (ImageView) findViewById(R.id.id_iv_all);
         mSeekBar = (SeekBar) findViewById(R.id.id_sk_seekbar);
+
+
+        voiceImageView = (ImageView) findViewById(R.id.id_iv_voice); //声音
+        brightnessImageView = (ImageView) findViewById(R.id.id_iv_brightness); // 亮度
+        speedImageView = (ImageView) findViewById(R.id.id_iv_speed); //快进
+        rewindImageView = (ImageView) findViewById(R.id.id_iv_rewind); //快退
+        iconTextView = (TextView) findViewById(R.id.id_tv_icon);
+        timeTextView = (TextView) findViewById(R.id.id_tv_time);
+
+        hideToImage();
+
+        obtainWidthOrHeight();
+
 
         startImageView.setOnClickListener(new MyImageViewOnClickListener());
         stopImageView.setOnClickListener(new MyImageViewOnClickListener());
@@ -107,6 +152,29 @@ public class MainActivity extends Activity {
         viewRelativeLayout = (RelativeLayout) findViewById(R.id.id_view_videoview);
     }
 
+    /**
+     * 获取屏幕宽高
+     */
+    private void obtainWidthOrHeight() {
+        WindowManager wm = this.getWindowManager();
+
+        screenWidth = wm.getDefaultDisplay().getWidth();
+        screenHeight = wm.getDefaultDisplay().getHeight();
+        System.out.println("1/2宽度=" + screenWidth / 2 + "，1/2高度=" + screenHeight / 2);
+    }
+
+    /**
+     * 初始状态默认为不显示
+     */
+    private void hideToImage() {
+        voiceImageView.setVisibility(View.INVISIBLE);
+        brightnessImageView.setVisibility(View.INVISIBLE);
+        speedImageView.setVisibility(View.INVISIBLE);
+        rewindImageView.setVisibility(View.INVISIBLE);
+        iconTextView.setVisibility(View.INVISIBLE);
+        timeTextView.setVisibility(View.INVISIBLE);
+    }
+
     private void initEvent() {
         mVideoView.setVideoPath("sdcard/Download/Movies/wodota3.mp4");
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -130,6 +198,63 @@ public class MainActivity extends Activity {
                 }
             }
         });
+        videoRelativeLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN://按下
+                        //当手指按下的时候
+                        x1 = event.getX();
+                        y1 = event.getY();
+                        System.out.println("x1 = " + x1 + ",y1 = " + y1);
+
+                        if (x1 < screenWidth / 2 - 100) {   //左边上下滑动
+                            leftFlag = true;
+                            if (y1 - y2 > 50) {
+                                setShowAnimation(brightnessImageView,2500);  //渐现
+
+                            } else if (y2 - y1 > 50) {
+                                setShowAnimation(brightnessImageView,2500);  //渐现
+                                //setHideAnimation(brightnessImageView,1500);
+                            }
+                        }
+                        if (x1 > screenWidth / 2 + 100) {  //右边上下滑动
+
+                            rightFlag = true;
+                            if (y1 - y2 > 50) {
+                                setShowAnimation(voiceImageView,2500);  //渐现
+                                //setHideAnimation(voiceImageView,1500);
+                            } else if (y2 - y1 > 50) {
+                                setShowAnimation(voiceImageView,2500);  //渐现
+                                //setHideAnimation(voiceImageView,1500);
+                            }
+                        }
+                        if (x1 - x2 > 75 && (y1 - y2 < 20 || y2 - y1 > -20) ){
+                            Log.i("TAG", "向左滑");
+                        } else if (x2 - x1 > 75 && (y1 - y2 < 20 || y2 - y1 > -20)) {
+                            Log.i("TAG", "向右滑");
+                        }
+                        break;
+
+                    case MotionEvent.ACTION_UP://松开
+                        //当手指离开的时候
+                        x2 = event.getX();
+                        y2 = event.getY();
+                        if(leftFlag == true){
+                            setHideAnimation(brightnessImageView,2500);
+                            leftFlag = false;
+                        }else if(rightFlag == true){
+                            setHideAnimation(voiceImageView,2500);
+                            rightFlag = false;
+                        }
+                        break;
+                    case MotionEvent.ACTION_MOVE://移动
+                        break;
+                }
+                return true;
+            }
+        });
+
 
     }
 
@@ -278,6 +403,94 @@ public class MainActivity extends Activity {
         }
 
     }
+
+
+    private AlphaAnimation mHideAnimation= null;
+    private AlphaAnimation mShowAnimation= null;
+
+    /**
+     * View渐隐动画效果
+     */
+    public  void setHideAnimation( final View view, int duration)
+    {
+        if (null == view || duration < 0)
+        {
+            return;
+        }
+
+        if (null != mHideAnimation)
+        {
+            mHideAnimation.cancel();
+        }
+        // 监听动画结束的操作
+        mHideAnimation = new AlphaAnimation(1.0f, 0.0f);
+        mHideAnimation.setDuration(duration);
+        mHideAnimation.setFillAfter(true);
+        mHideAnimation.setAnimationListener(new Animation.AnimationListener()
+        {
+
+            @Override
+            public void onAnimationStart(Animation arg0)
+            {
+                view.setClickable(false);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0)
+            {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation arg0)
+            {
+                view.setVisibility(View.GONE);
+            }
+        });
+        view.startAnimation(mHideAnimation);
+    }
+
+    /**
+     * View渐现动画效果
+     */
+    public  void setShowAnimation( final View view, int duration)
+    {
+        if (null == view || duration < 0)
+        {
+            return;
+        }
+        if (null != mShowAnimation)
+        {
+            mShowAnimation.cancel();
+        }
+        mShowAnimation = new AlphaAnimation(0.0f, 1.0f);
+        mShowAnimation.setDuration(duration);
+        mShowAnimation.setFillAfter(true);
+        mShowAnimation.setAnimationListener(new Animation.AnimationListener()
+        {
+
+            @Override
+            public void onAnimationStart(Animation arg0)
+            {
+                view.setVisibility(View.VISIBLE);
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0)
+            {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation arg0)
+            {
+                view.setClickable(true);
+            }
+        });
+        view.startAnimation(mShowAnimation);
+    }
+
 
 
 }

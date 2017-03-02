@@ -9,13 +9,76 @@
         android:id="@+id/id_view_videoview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:orientation="horizontal">
 
         <com.yy.videoview.videoview.YyVideoView
             android:id="@+id/id_vv_videoview"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true" />
+
+
+        <ImageView
+            android:id="@+id/id_iv_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30sp"
+            android:src="@mipmap/speed"
+            android:layout_marginEnd="75dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+             />
+
+        <ImageView
+            android:id="@+id/id_iv_rewind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30sp"
+            android:src="@mipmap/rewind"
+            android:layout_marginStart="75dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true" />
+
+
+        <ImageView
+            android:id="@+id/id_iv_brightness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/brightness"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+
+        <ImageView
+            android:id="@+id/id_iv_voice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/voice"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:id="@+id/id_tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textSize="18sp"
+            android:textColor="#55ffffff"
+            android:layout_centerVertical="true"
+            android:layout_alignStart="@+id/id_iv_brightness" />
+
+        <TextView
+            android:id="@+id/id_tv_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="快进"
+            android:textColor="#55ffffff"
+            android:textSize="18sp"
+            android:layout_marginTop="82dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignStart="@+id/id_iv_brightness" />
+
+
     </RelativeLayout>
 
     <LinearLayout
