@@ -6,5 +6,6 @@ package com.yy.videoview;
 
 public class UrlUtils {
     public static final String videoUrl = "http://ojnecqsh3.bkt.clouddn.com/20170126Zengyong-rangyasuiqianjinshangtianhua-01.mp4" ;
+    public static final String videoLocalUrl = "sdcard/Download/Movies/20170126Zengyong.mp4" ;
     public static final String video_type = "VIDEO_TYPE";
 }

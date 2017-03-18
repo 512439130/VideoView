@@ -16,9 +16,11 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yy.videoview.videoview.YyVideoView;
 
@@ -26,7 +28,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class VideoActivity extends Activity {
+public class VideoActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnInfoListener {
     private YyVideoView mVideoView;
 
     //控制视频相关（播放，暂停，继续）
@@ -49,6 +51,8 @@ public class VideoActivity extends Activity {
     float y2 = 0;
 
 
+
+
     private boolean leftFlag = false;  //左边滑动标示
     private boolean rightFlag = false;  //右边滑动标示
     private boolean speedFlag = false;  //快进滑动标示
@@ -56,6 +60,7 @@ public class VideoActivity extends Activity {
 
 
     private static SeekBar mSeekBar;
+
 
     //变换图标相关
     private Boolean StartFlag = true;
@@ -65,12 +70,12 @@ public class VideoActivity extends Activity {
     //触碰VideoView显示与隐藏SeekBar
     private Boolean SeekBarFlag = true;
 
-    private LinearLayout bottomLinearLayout;
-    private RelativeLayout videoRelativeLayout;
-    private RelativeLayout viewRelativeLayout;
+    private LinearLayout SeekBarLinearLayout;
 
+
+    private int duration = 0;  //记录记录视频的总时间
     private int currentPosition = 0;  //记录当前播放进度
-
+    private static int buffer_percent = 0; //记录当前缓存百分比
     private Timer timer;
 
 
@@ -79,16 +84,28 @@ public class VideoActivity extends Activity {
     private int screenHeight;
 
 
-    private static Handler handler = new Handler() {
+   /* private static Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             Bundle bundle = msg.getData();
             int duration = bundle.getInt("duration");
             int currentPosition = bundle.getInt("currentPosition");
+            int buffer_time = bundle.getInt("buffer_time");
+
+
             mSeekBar.setMax(duration);
             mSeekBar.setProgress(currentPosition);
+            mSeekBar.setSecondaryProgress(buffer_time);
+
+
+            System.out.println("handler_buffer_time=" + buffer_time);
+
+           *//* System.out.println("总时间=" + duration);
+            System.out.println("进度条=" + mSeekBar.getProgress());
+            System.out.println("缓冲进度条=" + mSeekBar.getSecondaryProgress());*//*
+
         }
-    };
+    };*/
 
 
     @Override
@@ -118,8 +135,10 @@ public class VideoActivity extends Activity {
         iconTextView = (TextView) findViewById(R.id.id_tv_icon);
         timeTextView = (TextView) findViewById(R.id.id_tv_time);
 
+        //初始状态默认为不显示控制组件
         hideToImage();
 
+        //计算屏幕宽高
         obtainWidthOrHeight();
 
 
@@ -140,16 +159,17 @@ public class VideoActivity extends Activity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                //获取视频总长
+                duration = mVideoView.getDuration();
                 //先获取进度条当前进度
-                int progress = seekBar.getProgress();
+                int progress = seekBar.getProgress() * duration / 100;   //进度条的百分比转换成视频播放时间
+
                 mVideoView.seekTo(progress);
 
             }
         });
 
-        bottomLinearLayout = (LinearLayout) findViewById(R.id.id_layout_bottom);
-        videoRelativeLayout = (RelativeLayout) findViewById(R.id.id_view_videoview);
-        viewRelativeLayout = (RelativeLayout) findViewById(R.id.id_view_videoview);
+        SeekBarLinearLayout = (LinearLayout) findViewById(R.id.id_layout_bottom);
     }
 
     /**
@@ -181,130 +201,38 @@ public class VideoActivity extends Activity {
         if (intent != null) {
             String value = intent.getStringExtra(UrlUtils.video_type);
             if (value.equals("local")) {
-                mVideoView.setVideoPath("sdcard/Download/Movies/wodota3.mp4");  //播放本地视频
+                mVideoView.setVideoPath(UrlUtils.videoLocalUrl);  //播放本地视频
             } else if (value.equals("interent")) {
-                //播放网络视频http://www.jb51.net/article/90992.htm
-
                 //设置视频路径
                 String videoUrl2 = UrlUtils.videoUrl;
-
                 Uri uri = Uri.parse(videoUrl2);
                 mVideoView.setVideoURI(uri);
             }
         }
 
-        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mVideoView.start();
-                mVideoView.seekTo(currentPosition);
-                addSeekBar();
-            }
-        });
-        videoRelativeLayout.setOnClickListener(new View.OnClickListener() {
+
+        mVideoView.setOnPreparedListener(this);
+        mVideoView.setOnInfoListener(this);
+
+        mVideoView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 System.out.println("点击了VideoView");
                 if (SeekBarFlag) {
-                    bottomLinearLayout.setVisibility(View.VISIBLE);  //SeekBar显示
+                    SeekBarLinearLayout.setVisibility(View.VISIBLE);  //SeekBar显示
                     SeekBarFlag = false;
                 } else {
-                    bottomLinearLayout.setVisibility(View.INVISIBLE);  //SeekBar隐藏
+                    SeekBarLinearLayout.setVisibility(View.INVISIBLE);  //SeekBar隐藏
                     SeekBarFlag = true;
                 }
             }
         });
-        videoRelativeLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN://按下
-                        //当手指按下的时候
 
-                        x1 = event.getX();
-                        y1 = event.getY();
-                        System.out.println("x1 = " + x1 + ",y1 = " + y1);
-
-                        if (x1 < screenWidth / 2 - 100) {   //左边上下滑动（亮度）http://www.cnblogs.com/zyw-205520/p/5660991.html
-
-                            if (y1 - y2 > 100 && (y1 - y2) > (x1 - x2)){
-                                setShowAnimation(brightnessImageView, 1800);  //渐现
-                                leftFlag = true;
-                                System.out.println("增加亮度");
-
-                            }else if (y2 - y1 > 100 && (y2 - y1) > (x2 - x1)) {
-                                leftFlag = true;
-                                setShowAnimation(brightnessImageView, 1800);  //渐现
-                                System.out.println("减少亮度");
-                            }
-                        }
-                        if (x1 > screenWidth / 2 + 100) {  //右边上下滑动
-
-
-                            if (y1 - y2 > 100 && (y1 - y2) > (x1 - x2)) {
-                                setShowAnimation(voiceImageView, 1800);  //渐现
-                                rightFlag = true;
-                                System.out.println("增加声音");
-                            } else if (y2 - y1 > 100 && (y2 - y1) > (x2 - x1)) {
-                                rightFlag = true;
-                                setShowAnimation(voiceImageView, 1800);  //渐现
-                                System.out.println("减少声音");
-                            }
-                        }
-                        if (x1 > screenWidth / 2 + 20) {
-
-                            if (x2 - x1 > 100 && (x2 - x1) > (y2 - y1)) {
-                                speedFlag = true;
-                                setShowAnimation(speedImageView, 1800);  //渐现
-                                System.out.println("快进");
-                            }
-                        }
-                        if (x1 < screenWidth / 2 - 20) {
-
-                            if (x1 - x2 > 100 && (x1 - x2) > (y1 - y2)) {
-                                rewindFlag = true;
-                                setShowAnimation(rewindImageView, 1800);  //渐现
-                                System.out.println("快退");
-                            }
-                        }
-
-
-                        break;
-
-                    case MotionEvent.ACTION_UP://松开
-                        //当手指离开的时候
-                        x2 = event.getX();
-                        y2 = event.getY();
-
-                        System.out.println("x2 = " + x2 + ",y2 = " + y2);
-
-                        if (leftFlag == true) {
-                            setHideAnimation(brightnessImageView, 1300);
-                            leftFlag = false;
-                        } else if (rightFlag == true) {
-                            setHideAnimation(voiceImageView, 1300);
-                            rightFlag = false;
-                        }
-                        if (speedFlag == true) {
-                            setHideAnimation(speedImageView, 1300);
-                            speedFlag = false;
-                        } else if (rewindFlag == true) {
-                            setHideAnimation(rewindImageView, 1300);
-                            rewindFlag = false;
-                        }
-                        break;
-                    case MotionEvent.ACTION_MOVE://移动
-                        //遗留问题（快进）
-
-
-                        break;
-                }
-                return true;
-            }
-        });
 
 
     }
+
+
 
     /**
      * 设置视频全屏播放
@@ -327,6 +255,66 @@ public class VideoActivity extends Activity {
             layoutParams.addRule(RelativeLayout.ALIGN_RIGHT);
             mVideoView.setLayoutParams(layoutParams);
         }
+    }
+
+    //播放视频前，VideoView对象必须要进入Prepared状态
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mp.start();
+        mp.seekTo(currentPosition);
+        mp.setLooping(true);   //设置循环播放
+        //设置音量//mp.setVolume(100,100);
+
+        //addSeekBar();
+
+        //设置ViedoView的缓冲监听
+        mp.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+            @Override
+            public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                // 获得当前播放时间和当前视频的长度
+                currentPosition = mVideoView.getCurrentPosition();
+                duration = mVideoView.getDuration();
+                int time = ((currentPosition * 100) / duration);
+                // 设置进度条的主要进度，表示当前的播放时间
+                mSeekBar.setProgress(time);
+
+                // 设置进度条的次要进度，表示视频的缓冲进度
+                buffer_percent = percent;
+                mSeekBar.setSecondaryProgress(buffer_percent);
+                System.out.println("当前缓冲的进度=" + buffer_percent);
+
+            }
+
+
+        });
+        //播放结束监听
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+
+            }
+        });
+        //设置错误信息监听
+        mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+            Toast.makeText(VideoActivity.this, "正在缓冲", Toast.LENGTH_LONG).show();
+        } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+            //此接口每次回调完START就回调END,若不加上判断就会出现缓冲图标一闪一闪的卡顿现象
+            if (mp.isPlaying()) {
+                Toast.makeText(VideoActivity.this, "缓冲结束", Toast.LENGTH_LONG).show();
+                mVideoView.setVisibility(View.VISIBLE);
+            }
+        }
+        return true;
     }
 
 
@@ -364,7 +352,7 @@ public class VideoActivity extends Activity {
                     StopFlag = false;
                     stopTimer();  //停止计时器
                     mSeekBar.setProgress(0);//停止后改变进度条为初始
-                    mVideoView.stopPlayback();
+
                     currentPosition = 0; //播放进度记录清零
                     break;
                 case R.id.id_iv_all:  //横屏/竖屏显示
@@ -387,38 +375,14 @@ public class VideoActivity extends Activity {
         }
     }
 
-    /**
-     * 开启一个计时器监听进度条变化
-     */
-    private void addSeekBar() {
-        if (timer == null) {
-            timer = new Timer();
-            System.out.println("计时器为空");
-        }
-        //设置计时任务:每500毫秒获取一次当前的播放进度,更新进度条
-        //获取当前曲目的持续时间
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {  //每500毫秒执行一次
-                //获取当前播放进度
-                int duration = mVideoView.getDuration();//获取歌曲时长
-                int currentPosition = mVideoView.getCurrentPosition(); //获取当前位置
-                Message msg = VideoActivity.handler.obtainMessage();
-                Bundle bundle = new Bundle();
-                bundle.putInt("duration", duration);
-                bundle.putInt("currentPosition", currentPosition);
-                msg.setData(bundle);
-                //发送消息，让进度条更新
-                VideoActivity.handler.sendMessage(msg);
-            }
-        }, 5, 500);
-    }
-
 
     @Override
     protected void onPause() {
         currentPosition = mVideoView.getCurrentPosition();
-        stopTimer();    //点击home键退出播放器时，停止掉Timer计时器
+        duration = mVideoView.getDuration();
+        buffer_percent = mVideoView.getBufferPercentage();
+
+        // stopTimer();    //点击home键退出播放器时，停止掉Timer计时器
         System.out.println("onPause调用");
         mVideoView.pause();
         super.onPause();
@@ -429,6 +393,7 @@ public class VideoActivity extends Activity {
     @Override
     protected void onResume() {
         mVideoView.resume();
+
         super.onResume();
     }
 
@@ -532,6 +497,44 @@ public class VideoActivity extends Activity {
         });
         view.startAnimation(mShowAnimation);
     }
+
+    /**
+     * 开启一个计时器监听进度条变化
+     */
+    /*
+    private void addSeekBar() {
+        if (timer == null) {
+            timer = new Timer();
+            System.out.println("计时器为空");
+        }
+        //设置计时任务:每500毫秒获取一次当前的播放进度,更新进度条
+        //获取当前曲目的持续时间
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {  //每500毫秒执行一次
+                //获取当前播放进度
+                int duration = mVideoView.getDuration();//获取视频时长
+                int currentPosition = mVideoView.getCurrentPosition(); //获取当前位置
+                int buffer_time = duration * (buffer_percent / 82); //获取缓冲进度
+                System.out.println("总时间=" + duration);
+                System.out.println("进度条=" + mSeekBar.getProgress());
+
+
+                System.out.println("当前缓冲的时间="+buffer_time);
+
+                Message msg = VideoActivity.handler.obtainMessage();
+                Bundle bundle = new Bundle();
+                bundle.putInt("duration", duration);
+                bundle.putInt("currentPosition", currentPosition);
+
+                bundle.putInt("buffer_time", buffer_time);
+
+                msg.setData(bundle);
+                //发送消息，让进度条更新
+                VideoActivity.handler.sendMessage(msg);
+            }
+        }, 5, 500);
+    }*/
 
 
 }
