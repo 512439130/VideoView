@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -180,14 +179,14 @@ public class VideoActivity extends Activity {
         Intent intent = getIntent();
         //从Intent当中根据key取得value
         if (intent != null) {
-            String value = intent.getStringExtra(Utils.video_type);
+            String value = intent.getStringExtra(UrlUtils.video_type);
             if (value.equals("local")) {
                 mVideoView.setVideoPath("sdcard/Download/Movies/wodota3.mp4");  //播放本地视频
             } else if (value.equals("interent")) {
                 //播放网络视频http://www.jb51.net/article/90992.htm
 
                 //设置视频路径
-                String videoUrl2 = Utils.videoUrl;
+                String videoUrl2 = UrlUtils.videoUrl;
 
                 Uri uri = Uri.parse(videoUrl2);
                 mVideoView.setVideoURI(uri);

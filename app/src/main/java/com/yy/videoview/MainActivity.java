@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //播放本地视频
                 Intent intent = new Intent(MainActivity.this,VideoActivity.class);
-                intent.putExtra(Utils.video_type,"local");
+                intent.putExtra(UrlUtils.video_type,"local");
                 startActivity(intent);
             }
         });
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //播放网络视频
                 Intent intent = new Intent(MainActivity.this,VideoActivity.class);
-                intent.putExtra(Utils.video_type,"interent");
+                intent.putExtra(UrlUtils.video_type,"interent");
                 startActivity(intent);
             }
         });
