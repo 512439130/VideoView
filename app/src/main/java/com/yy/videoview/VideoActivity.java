@@ -37,12 +37,12 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
     private ImageView allImageView;
 
     //控制视频相关（快进，声音，亮度）
-    private ImageView voiceImageView;  //声音
-    private ImageView brightnessImageView;  //亮度
-    private ImageView speedImageView; //快进
-    private ImageView rewindImageView; //快退
-    private TextView iconTextView;
-    private TextView timeTextView;
+    public static ImageView voiceImageView;  //声音
+    public static ImageView brightnessImageView;  //亮度
+    public static ImageView speedImageView; //快进
+    public static ImageView rewindImageView; //快退
+    public static TextView iconTextView;
+    public static TextView timeTextView;
 
     //手指按下的点为(x1, y1)手指离开屏幕的点为(x2, y2)
     float x1 = 0;
@@ -53,10 +53,7 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
 
 
 
-    private boolean leftFlag = false;  //左边滑动标示
-    private boolean rightFlag = false;  //右边滑动标示
-    private boolean speedFlag = false;  //快进滑动标示
-    private boolean rewindFlag = false;  //快退滑动标示
+
 
 
     private static SeekBar mSeekBar;
@@ -107,7 +104,6 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
         }
     };*/
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -135,11 +131,10 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
         iconTextView = (TextView) findViewById(R.id.id_tv_icon);
         timeTextView = (TextView) findViewById(R.id.id_tv_time);
 
-        //初始状态默认为不显示控制组件
+        //初始状态默认为不显示控制组件（不添加会引起进度条控件失效）
         hideToImage();
 
-        //计算屏幕宽高
-        obtainWidthOrHeight();
+
 
 
 
@@ -174,16 +169,6 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
         SeekBarLinearLayout = (LinearLayout) findViewById(R.id.id_layout_bottom);
     }
 
-    /**
-     * 获取屏幕宽高
-     */
-    private void obtainWidthOrHeight() {
-        WindowManager wm = this.getWindowManager();
-
-        screenWidth = wm.getDefaultDisplay().getWidth();
-        screenHeight = wm.getDefaultDisplay().getHeight();
-        System.out.println("1/2宽度=" + screenWidth / 2 + "，1/2高度=" + screenHeight / 2);
-    }
 
     /**
      * 初始状态默认为不显示

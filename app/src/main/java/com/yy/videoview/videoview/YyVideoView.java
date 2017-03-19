@@ -11,7 +11,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.ImageView;
 import android.widget.VideoView;
+
+import com.yy.videoview.R;
+import com.yy.videoview.VideoActivity;
 
 /**
  * Created by 13160677911 on 2016-11-27.
@@ -39,6 +43,13 @@ public class YyVideoView extends VideoView {
     private boolean speedFlag = false;  //快进滑动标示
     private boolean rewindFlag = false;  //快退滑动标示
 
+
+    //控制视频相关（快进，声音，亮度）
+    private ImageView voiceImageView;  //声音
+    private ImageView brightnessImageView;  //亮度
+    private ImageView speedImageView; //快进
+    private ImageView rewindImageView; //快退
+
     /*
     * 第一属于程序内实例化时采用，之传入Context即可
     * 第二个用于layout文件实例化，会把XML内的参数通过AttributeSet带入到View内。
@@ -46,16 +57,31 @@ public class YyVideoView extends VideoView {
     * */
     public YyVideoView(Context context) {
         this(context, null);
+        System.out.println("1个参数构造方法调用");
     }
 
     public YyVideoView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        System.out.println("2个参数构造方法调用");
 
     }
-
     public YyVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        System.out.println("3个参数构造方法调用");
     }
+
+
+    /**
+     * 初始状态默认为不显示
+     */
+    private void hideToImage() {
+        VideoActivity.voiceImageView.setVisibility(View.INVISIBLE);
+        VideoActivity.brightnessImageView.setVisibility(View.INVISIBLE);
+        VideoActivity.speedImageView.setVisibility(View.INVISIBLE);
+        VideoActivity.rewindImageView.setVisibility(View.INVISIBLE);
+    }
+
+
 
 
     @Override
@@ -81,8 +107,8 @@ public class YyVideoView extends VideoView {
         videoHeight = this.getHeight();
         System.out.println("手机宽高，宽度" + screenWidth + "，高度=" + screenHeight);
         System.out.println("视频播放器宽高，宽度" + videoWidth  + "，高度=" + videoHeight );
-
-
+        //切换全屏小屏时需要先隐藏图标
+        hideToImage();
     }
 
     /**
@@ -154,71 +180,62 @@ public class YyVideoView extends VideoView {
             if (firstY - secondY > 100 && (firstY - secondY) > (firstX - secondX)) {
                 leftFlag = true;
                 System.out.println("增加亮度");
+                setShowAnimation(VideoActivity.brightnessImageView, 1800);  //渐现
 
             } else if (secondY - firstY > 100 && (secondY - firstY) > (secondX - firstX)) {
                 leftFlag = true;
                 System.out.println("减少亮度");
+                setShowAnimation(VideoActivity.brightnessImageView, 1800);  //渐现
             }else if (secondX - firstX > 100 && ((secondX - firstX) > (secondY - firstY))) {
                 speedFlag = true;
                 System.out.println("快进");
+                setShowAnimation(VideoActivity.speedImageView, 1800);  //渐现
             }else if (firstX - secondX > 100 && ((firstX - secondX) > (firstY - secondY)) ){
                 rewindFlag = true;
                 System.out.println("快退");
+                setShowAnimation(VideoActivity.rewindImageView, 1800);  //渐现
             }
         }
 
         if (firstX > videoWidth / 2 ) {  //右边上下滑动
-
-
             if (firstY - secondY > 100 && ((firstY - secondY) > (firstX - secondX))) {
                 rightFlag = true;
                 System.out.println("增加声音");
+                setShowAnimation(VideoActivity.voiceImageView, 1800);  //渐现
             } else if (secondY - firstY > 100 && ((secondY - firstY) > (secondX - firstX))) {
                 rightFlag = true;
                 System.out.println("减少声音");
+                setShowAnimation(VideoActivity.voiceImageView, 1800);  //渐现
             }else if (secondX - firstX > 100 && ((secondX - firstX) > (secondY - firstY))) {
                 speedFlag = true;
                 System.out.println("快进");
+                setShowAnimation(VideoActivity.speedImageView, 1800);  //渐现
             }else if (firstX - secondX > 100 && ((firstX - secondX) > (firstY - secondY)) ){
                 rewindFlag = true;
                 System.out.println("快退");
+                setShowAnimation(VideoActivity.rewindImageView, 1800);  //渐现
             }
         }
-
-       /* if (firstX > screenWidth / 2 + 20) {
-
-            if (secondX - firstX > 100 && (secondX - firstX) > (secondY - firstY)) {
-                speedFlag = true;
-                System.out.println("快进");
-            }
-
-        }
-
-        if (firstX < screenWidth / 2 - 20) {
-
-            if (firstX - secondX > 100 && ((firstX - secondX) > (firstY - secondY)) ){
-                rewindFlag = true;
-                System.out.println("快退");
-            }
-
-        }*/
-
 
         if (leftFlag == true) {
+            setHideAnimation(VideoActivity.brightnessImageView, 1300);
             System.out.println("亮度消失动画");
             leftFlag = false;
 
         } else if (rightFlag == true) {
+            setHideAnimation(VideoActivity.voiceImageView, 1300);
             System.out.println("声音消失动画");
             rightFlag = false;
 
         }
 
         if (speedFlag == true) {
+            setHideAnimation(VideoActivity.speedImageView, 1300);
             System.out.println("快进消失动画");
             speedFlag = false;
 
         } else if (rewindFlag == true) {
+            setHideAnimation(VideoActivity.rewindImageView, 1300);
             System.out.println("快退消失动画");
             rewindFlag = false;
         }
