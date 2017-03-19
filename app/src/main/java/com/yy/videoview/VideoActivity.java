@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.yy.videoview.videoview.YyVideoView;
 
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,11 +50,6 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
     float x2 = 0;
     float y1 = 0;
     float y2 = 0;
-
-
-
-
-
 
 
     private static SeekBar mSeekBar;
@@ -103,6 +99,10 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
 
         }
     };*/
+    /**
+     * 定时隐藏
+     */
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +113,7 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
         initView();
         initLayout(true);
         initEvent();
+
     }
 
 
@@ -130,43 +131,14 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
         rewindImageView = (ImageView) findViewById(R.id.id_iv_rewind); //快退
         iconTextView = (TextView) findViewById(R.id.id_tv_icon);
         timeTextView = (TextView) findViewById(R.id.id_tv_time);
+        SeekBarLinearLayout = (LinearLayout) findViewById(R.id.id_layout_bottom);
+
 
         //初始状态默认为不显示控制组件（不添加会引起进度条控件失效）
         hideToImage();
 
 
 
-
-
-
-        startImageView.setOnClickListener(new MyImageViewOnClickListener());
-        stopImageView.setOnClickListener(new MyImageViewOnClickListener());
-        allImageView.setOnClickListener(new MyImageViewOnClickListener());
-        //设置进度条的滑动监听
-        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                //获取视频总长
-                duration = mVideoView.getDuration();
-                //先获取进度条当前进度
-                int progress = seekBar.getProgress() * duration / 100;   //进度条的百分比转换成视频播放时间
-
-                mVideoView.seekTo(progress);
-
-            }
-        });
-
-        SeekBarLinearLayout = (LinearLayout) findViewById(R.id.id_layout_bottom);
     }
 
 
@@ -200,25 +172,38 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
 
         mVideoView.setOnPreparedListener(this);
         mVideoView.setOnInfoListener(this);
-
+        startImageView.setOnClickListener(new MyImageViewOnClickListener());
+        stopImageView.setOnClickListener(new MyImageViewOnClickListener());
+        allImageView.setOnClickListener(new MyImageViewOnClickListener());
         mVideoView.setOnClickListener(new View.OnClickListener() {
+            long prelongTim = 0;//定义上一次单击的时间
             @Override
             public void onClick(View v) {
                 System.out.println("点击了VideoView");
                 if (SeekBarFlag) {
-                    SeekBarLinearLayout.setVisibility(View.VISIBLE);  //SeekBar显示
+                    setShowAnimation(SeekBarLinearLayout, 1500);  //SeekBar显示渐现
                     SeekBarFlag = false;
+                    /*mHandler.postDelayed(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            setHideAnimation(SeekBarLinearLayout, 2000);//SeekBar隐藏
+                            SeekBarFlag = true;
+                        }
+                    },4000);*/
                 } else {
-                    SeekBarLinearLayout.setVisibility(View.INVISIBLE);  //SeekBar隐藏
+                    setHideAnimation(SeekBarLinearLayout, 1500);//SeekBar隐藏
                     SeekBarFlag = true;
                 }
             }
         });
 
+        //设置进度条的滑动监听
+        mSeekBar.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());
 
 
     }
-
 
 
     /**
@@ -339,7 +324,7 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
                     StopFlag = false;
                     stopTimer();  //停止计时器
                     mSeekBar.setProgress(0);//停止后改变进度条为初始
-
+                    mVideoView.stopPlayback();
                     currentPosition = 0; //播放进度记录清零
                     break;
                 case R.id.id_iv_all:  //横屏/竖屏显示
@@ -485,11 +470,34 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
         view.startAnimation(mShowAnimation);
     }
 
+    private class MyOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            //获取视频总长
+            duration = mVideoView.getDuration();
+            //先获取进度条当前进度
+            int progress = seekBar.getProgress() * duration / 100;   //进度条的百分比转换成视频播放时间
+
+            mVideoView.seekTo(progress);
+
+        }
+    }
+}
 
 
-    /**
-     * 开启一个计时器监听进度条变化
-     */
+/**
+ * 开启一个计时器监听进度条变化
+ */
     /*
     private void addSeekBar() {
         if (timer == null) {
@@ -526,4 +534,4 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
     }*/
 
 
-}
+
