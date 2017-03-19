@@ -142,8 +142,7 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
         obtainWidthOrHeight();
 
 
-        //计算视频播放器宽高
-        obtainAssemblyWidOrHei();
+
 
         startImageView.setOnClickListener(new MyImageViewOnClickListener());
         stopImageView.setOnClickListener(new MyImageViewOnClickListener());
@@ -501,15 +500,7 @@ public class VideoActivity extends Activity implements MediaPlayer.OnPreparedLis
         view.startAnimation(mShowAnimation);
     }
 
-    public void obtainAssemblyWidOrHei(){
-        int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-        int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-        mVideoView.measure(w, h);
-        int width =mVideoView.getMeasuredWidth();
-        int height =mVideoView.getMeasuredHeight();
 
-        System.out.println("视频播放器，宽="+width+"高="+height);
-    }
 
     /**
      * 开启一个计时器监听进度条变化

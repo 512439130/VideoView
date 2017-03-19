@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -26,14 +27,11 @@ public class YyVideoView extends VideoView {
     private int screenWidth;
     private int screenHeight;
 
+
+
     //视频播放器宽高
     private int videoWidth;
     private int videoHeight;
-
-    //实际屏幕播放器宽高
-    private int width;
-    private int height;
-
 
 
     private boolean leftFlag = false;  //左边滑动标示
@@ -52,7 +50,7 @@ public class YyVideoView extends VideoView {
 
     public YyVideoView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        obtainWidthOrHeight();  //获取屏幕宽高
+
     }
 
     public YyVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -64,32 +62,40 @@ public class YyVideoView extends VideoView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // TODO Auto-generated method stub
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        /*//获取MyTextView当前实例的宽
+        videoWidth = this.getWidth();
+        //获取MyTextView当前实例的高
+        videoHeight = this.getHeight();
+
+        //通过Log.v打印输出显示
+        Log.v("onMeasure获取控件宽高", ",宽:" + videoWidth + "高:" + videoHeight);*/
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        obtainWidthOrHeight();  //获取屏幕宽高
+        //获取MyTextView当前实例的宽
+        videoWidth = this.getWidth();
+        //获取MyTextView当前实例的高
+        videoHeight = this.getHeight();
+        System.out.println("手机宽高，宽度" + screenWidth + "，高度=" + screenHeight);
+        System.out.println("视频播放器宽高，宽度" + videoWidth  + "，高度=" + videoHeight );
+
+
     }
 
     /**
-     * 获取屏幕宽高
+     * 获取宽高
      */
     private void obtainWidthOrHeight() {
-
-
         WindowManager manager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
         manager.getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
-        System.out.println("手机宽高" + screenWidth / 2 + "，1/2高度=" + screenHeight / 2);
 
-        //判断是全屏还是小屏
-        if(true){  //全屏
-            width = screenHeight;
-            height = screenWidth;
 
-        }else{  //小屏
-            width = videoWidth;
-            height = videoHeight;
-        }
-
-        System.out.println("实际播放器，1/2宽度" + width / 2 + "，1/2高度=" + height / 2);
     }
 
     /**
@@ -143,7 +149,7 @@ public class YyVideoView extends VideoView {
     }
 
     private void SlideListener() {
-        if (firstX < width / 2) {   //左边上下滑动（亮度）http://www.cnblogs.com/zyw-205520/p/5660991.html
+        if (firstX < videoWidth / 2) {   //左边上下滑动（亮度）http://www.cnblogs.com/zyw-205520/p/5660991.html
 
             if (firstY - secondY > 100 && (firstY - secondY) > (firstX - secondX)) {
                 leftFlag = true;
@@ -161,7 +167,7 @@ public class YyVideoView extends VideoView {
             }
         }
 
-        if (firstX > width / 2 ) {  //右边上下滑动
+        if (firstX > videoWidth / 2 ) {  //右边上下滑动
 
 
             if (firstY - secondY > 100 && ((firstY - secondY) > (firstX - secondX))) {
