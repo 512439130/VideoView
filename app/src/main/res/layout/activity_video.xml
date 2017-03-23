@@ -2,13 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/id_view_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:gravity="center">
 
     <RelativeLayout
         android:id="@+id/id_view_videoview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_margin="10dp"
         android:orientation="horizontal">
 
         <com.yy.videoview.videoview.YyVideoView
@@ -16,7 +18,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true" />
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true" />
 
 
         <ImageView
@@ -24,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="50dp"
-            android:src="@mipmap/speed"
+            android:src="@drawable/speed"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
              />
@@ -34,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="50dp"
-            android:src="@mipmap/rewind"
+            android:src="@drawable/rewind"
             android:layout_centerVertical="true"
             android:layout_alignParentLeft="true" />
 
@@ -43,7 +46,7 @@
             android:id="@+id/id_iv_brightness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/brightness"
+            android:src="@drawable/brightness"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true" />
 
@@ -51,31 +54,9 @@
             android:id="@+id/id_iv_voice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/voice"
+            android:src="@drawable/voice"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true" />
-
-        <TextView
-            android:id="@+id/id_tv_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textSize="18sp"
-            android:textColor="#55ffffff"
-            android:layout_centerVertical="true"
-            android:layout_alignStart="@+id/id_iv_brightness" />
-
-        <TextView
-            android:id="@+id/id_tv_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="快进"
-            android:textColor="#55ffffff"
-            android:textSize="18sp"
-            android:layout_marginTop="82dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignStart="@+id/id_iv_brightness" />
-
 
     </RelativeLayout>
 
@@ -86,6 +67,7 @@
         android:layout_alignBottom="@id/id_view_videoview"
         android:gravity="center"
         android:orientation="horizontal"
+        android:layout_margin="10dp"
         android:visibility="invisible">
 
         <ImageView
@@ -94,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:scaleType="center"
-            android:src="@mipmap/pause" />
+            android:src="@drawable/pause" />
 
         <ImageView
             android:id="@+id/id_iv_stop"
@@ -102,13 +84,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:scaleType="center"
-            android:src="@mipmap/stop" />
+            android:src="@drawable/stop" />
 
         <SeekBar
             android:id="@+id/id_sk_seekbar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="7" />
+            android:layout_weight="12"
+            android:progressDrawable="@drawable/seekbar"
+            android:thumb="@drawable/seekbar_button"/>
 
         <ImageView
             android:id="@+id/id_iv_all"
@@ -116,6 +100,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:scaleType="center"
-            android:src="@mipmap/max" />
+            android:src="@drawable/max" />
     </LinearLayout>
 </RelativeLayout>

@@ -45,8 +45,7 @@ public class VideoActivity extends Activity{
     public static ImageView brightnessImageView;  //亮度
     public static ImageView speedImageView; //快进
     public static ImageView rewindImageView; //快退
-    public static TextView iconTextView;
-    public static TextView timeTextView;
+
 
 
 
@@ -100,8 +99,7 @@ public class VideoActivity extends Activity{
         brightnessImageView = (ImageView) findViewById(R.id.id_iv_brightness); // 亮度
         speedImageView = (ImageView) findViewById(R.id.id_iv_speed); //快进
         rewindImageView = (ImageView) findViewById(R.id.id_iv_rewind); //快退
-        iconTextView = (TextView) findViewById(R.id.id_tv_icon);
-        timeTextView = (TextView) findViewById(R.id.id_tv_time);
+
         SeekBarLinearLayout = (LinearLayout) findViewById(R.id.id_layout_bottom);
 
 
@@ -143,7 +141,9 @@ public class VideoActivity extends Activity{
 
         mSeekBar.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());  //进度条的滑动监听
 
-        mVideoView.setOnPreparedListener(new MyOnPreparedListener());  //缓冲监听
+        mVideoView.setOnPreparedListener(new MyOnPreparedListener());  //播放监听
+        mVideoView.setOnCompletionListener(new MyOnCompletionListener());
+
         mVideoView.setOnInfoListener(new MyOnInfoListener());  //缓冲状态监听
     }
 
@@ -214,8 +214,6 @@ public class VideoActivity extends Activity{
         brightnessImageView.setVisibility(View.INVISIBLE);
         speedImageView.setVisibility(View.INVISIBLE);
         rewindImageView.setVisibility(View.INVISIBLE);
-        iconTextView.setVisibility(View.INVISIBLE);
-        timeTextView.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -230,11 +228,11 @@ public class VideoActivity extends Activity{
                     //变换开始按钮为暂停按钮
 
                     if (StartFlag) {   //点击了暂停按钮，变化为播放按钮
-                        startImageView.setImageResource(R.mipmap.start);
+                        startImageView.setImageResource(R.drawable.start);
                         mVideoView.pause();
                         StartFlag = false;
                     } else {
-                        startImageView.setImageResource(R.mipmap.pause);
+                        startImageView.setImageResource(R.drawable.pause);
                         StartFlag = true;
                         if (!StopFlag) {  //当停止按钮按下后
                             mVideoView.resume();
@@ -247,7 +245,7 @@ public class VideoActivity extends Activity{
                 case R.id.id_iv_stop:  //停止播放
                     System.out.println("停止播放");
                     //停止后改变图标
-                    startImageView.setImageResource(R.mipmap.start);
+                    startImageView.setImageResource(R.drawable.start);
                     StartFlag = false;  //改变图标
                     StopFlag = false;
 
@@ -257,12 +255,12 @@ public class VideoActivity extends Activity{
                     break;
                 case R.id.id_iv_all:  //横屏/竖屏显示
                     if (ScreenFlag) {   //点击了暂停按钮，变化为播放按钮
-                        allImageView.setImageResource(R.mipmap.all);
+                        allImageView.setImageResource(R.drawable.all);
                         ScreenFlag = false;
                         initLayout(false);  //改变视频为全屏
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);  //横屏
                     } else {
-                        allImageView.setImageResource(R.mipmap.max);
+                        allImageView.setImageResource(R.drawable.max);
                         ScreenFlag = true;
                         initLayout(true);
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);  //竖屏
@@ -282,16 +280,16 @@ public class VideoActivity extends Activity{
     private class MyOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+            System.out.println("停止拖动");
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
+            System.out.println("开始拖动");
         }
-
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
+            System.out.println("停止拖动");
             //获取视频总长
             duration = mVideoView.getDuration();
             //先获取进度条当前进度
@@ -335,7 +333,9 @@ public class VideoActivity extends Activity{
         //播放视频前，VideoView对象必须要进入Prepared状态
         @Override
         public void onPrepared(MediaPlayer mp) {
-            mp.start();
+            //加载进度条2秒
+
+            mVideoView.start();
             mp.seekTo(currentPosition);
             mp.setLooping(true);   //设置循环播放
             //设置ViedoView的缓冲监听
@@ -351,7 +351,8 @@ public class VideoActivity extends Activity{
             // 获得当前播放时间和当前视频的长度
             currentPosition = mVideoView.getCurrentPosition();
             duration = mVideoView.getDuration();
-            int time = ((currentPosition * 100) / duration);
+            int time = 3;
+            time = ((currentPosition * 100) / duration) + time;
             // 设置进度条的主要进度，表示当前的播放时间
             mSeekBar.setProgress(time);
 
@@ -361,6 +362,23 @@ public class VideoActivity extends Activity{
             System.out.println("当前缓冲的进度=" + buffer_percent);
         }
     }
+
+    /**
+     * 播放结束监听
+     */
+    private class MyOnCompletionListener implements MediaPlayer.OnCompletionListener {
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            mSeekBar.setProgress(0);//停止后改变进度条为初始
+            currentPosition = 0; //播放进度记录清零
+            mVideoView.start();
+            //播放结束后的动作
+            mp.seekTo(currentPosition);
+
+
+        }
+    }
+
     /**
      * 缓冲状态监听
      */
@@ -368,11 +386,11 @@ public class VideoActivity extends Activity{
         @Override
         public boolean onInfo(MediaPlayer mp, int what, int extra) {
             if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
-                Toast.makeText(VideoActivity.this, "正在缓冲", Toast.LENGTH_LONG).show();
+                //Toast.makeText(VideoActivity.this, "正在缓冲", Toast.LENGTH_LONG).show();
             } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
                 //此接口每次回调完START就回调END,若不加上判断就会出现缓冲图标一闪一闪的卡顿现象
                 if (mp.isPlaying()) {
-                    Toast.makeText(VideoActivity.this, "缓冲结束", Toast.LENGTH_LONG).show();
+                   // Toast.makeText(VideoActivity.this, "缓冲结束", Toast.LENGTH_LONG).show();
                     mVideoView.setVisibility(View.VISIBLE);
                 }
             }
@@ -459,6 +477,8 @@ public class VideoActivity extends Activity{
         });
         view.startAnimation(mShowAnimation);
     }
+
+
 }
 
 

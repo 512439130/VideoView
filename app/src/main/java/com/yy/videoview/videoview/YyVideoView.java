@@ -225,10 +225,43 @@ public class YyVideoView extends VideoView {
      * 滑动手势判断
      */
     private void SlideListener() {
-        if (firstX < videoWidth / 2) {   //左边上下滑动（亮度）http://www.cnblogs.com/zyw-205520/p/5660991.html
+        if (firstX < videoWidth / 2) {   //左边上下滑动（声音）
 
             if (firstY - secondY > 100 && (firstY - secondY) > (firstX - secondX)) {
                 leftFlag = true;
+                System.out.println("增加声音");
+                setShowAnimation(VideoActivity.voiceImageView, 1800);  //渐现
+                if (audio <= 15) {
+                    setAudio(2);  //系统声音最大值为15
+                }else if(audio == 15){
+                    setAudio(1);
+                }
+
+            } else if (secondY - firstY > 100 && (secondY - firstY) > (secondX - firstX)) {
+                leftFlag = true;
+                System.out.println("减少声音");
+                setShowAnimation(VideoActivity.voiceImageView, 1800);  //渐现
+                if (audio >= 0) {
+                    setAudio(-2);  //系统声音最大值为15
+                }else if(audio == 1){
+                    setAudio(-1);
+                }
+
+            } else if (secondX - firstX > 100 && ((secondX - firstX) > (secondY - firstY))) {
+                speedFlag = true;
+                //System.out.println("快进");
+                //setShowAnimation(VideoActivity.speedImageView, 1800);  //渐现
+            } else if (firstX - secondX > 100 && ((firstX - secondX) > (firstY - secondY))) {
+                rewindFlag = true;
+                //System.out.println("快退");
+                //setShowAnimation(VideoActivity.rewindImageView, 1800);  //渐现
+            }
+        }
+
+        if (firstX > videoWidth / 2) {  //右边上下滑动（亮度）
+            if (firstY - secondY > 100 && ((firstY - secondY) > (firstX - secondX))) {
+                rightFlag = true;
+
                 System.out.println("增加亮度");   //系统亮度最大值为255
                 setShowAnimation(VideoActivity.brightnessImageView, 1800);  //渐现
                 if(light <= 255){
@@ -236,79 +269,48 @@ public class YyVideoView extends VideoView {
                 }else if(light == 234){
                     setLightness(21);
                 }
+            } else if (secondY - firstY > 100 && ((secondY - firstY) > (secondX - firstX))) {
+                rightFlag = true;
 
-
-            } else if (secondY - firstY > 100 && (secondY - firstY) > (secondX - firstX)) {
-                leftFlag = true;
                 System.out.println("减少亮度");
+                setShowAnimation(VideoActivity.brightnessImageView, 1800);  //渐现
                 if(light >= 0){
                     setLightness(-26);
                 }else if(light == 21){
                     setLightness(-21);
                 }
-                setShowAnimation(VideoActivity.brightnessImageView, 1800);  //渐现
             } else if (secondX - firstX > 100 && ((secondX - firstX) > (secondY - firstY))) {
                 speedFlag = true;
-                System.out.println("快进");
-                setShowAnimation(VideoActivity.speedImageView, 1800);  //渐现
+                //System.out.println("快进");
+                //setShowAnimation(VideoActivity.speedImageView, 1800);  //渐现
             } else if (firstX - secondX > 100 && ((firstX - secondX) > (firstY - secondY))) {
                 rewindFlag = true;
-                System.out.println("快退");
-                setShowAnimation(VideoActivity.rewindImageView, 1800);  //渐现
-            }
-        }
-
-        if (firstX > videoWidth / 2) {  //右边上下滑动
-            if (firstY - secondY > 100 && ((firstY - secondY) > (firstX - secondX))) {
-                rightFlag = true;
-                System.out.println("增加声音");
-                if (audio <= 15) {
-                    setAudio(2);  //系统声音最大值为15
-                }else if(audio == 15){
-                    setAudio(1);
-                }
-
-                setShowAnimation(VideoActivity.voiceImageView, 1800);  //渐现
-            } else if (secondY - firstY > 100 && ((secondY - firstY) > (secondX - firstX))) {
-                rightFlag = true;
-                System.out.println("减少声音");
-                if (audio >= 0) {
-                    setAudio(-2);  //系统声音最大值为15
-                }else if(audio == 1){
-                    setAudio(-1);
-                }
-                setShowAnimation(VideoActivity.voiceImageView, 1800);  //渐现
-            } else if (secondX - firstX > 100 && ((secondX - firstX) > (secondY - firstY))) {
-                speedFlag = true;
-                System.out.println("快进");
-                setShowAnimation(VideoActivity.speedImageView, 1800);  //渐现
-            } else if (firstX - secondX > 100 && ((firstX - secondX) > (firstY - secondY))) {
-                rewindFlag = true;
-                System.out.println("快退");
-                setShowAnimation(VideoActivity.rewindImageView, 1800);  //渐现
+                //System.out.println("快退");
+                //setShowAnimation(VideoActivity.rewindImageView, 1800);  //渐现
             }
         }
 
         if (leftFlag == true) {
-            setHideAnimation(VideoActivity.brightnessImageView, 1300);
-            System.out.println("亮度消失动画");
+            setHideAnimation(VideoActivity.voiceImageView, 1300);
+            System.out.println("声音消失动画");
             leftFlag = false;
 
         } else if (rightFlag == true) {
-            setHideAnimation(VideoActivity.voiceImageView, 1300);
-            System.out.println("声音消失动画");
+
+            setHideAnimation(VideoActivity.brightnessImageView, 1300);
+            System.out.println("亮度消失动画");
             rightFlag = false;
 
         }
 
         if (speedFlag == true) {
-            setHideAnimation(VideoActivity.speedImageView, 1300);
-            System.out.println("快进消失动画");
+            //setHideAnimation(VideoActivity.speedImageView, 1300);
+            //System.out.println("快进消失动画");
             speedFlag = false;
 
         } else if (rewindFlag == true) {
-            setHideAnimation(VideoActivity.rewindImageView, 1300);
-            System.out.println("快退消失动画");
+            //setHideAnimation(VideoActivity.rewindImageView, 1300);
+            //System.out.println("快退消失动画");
             rewindFlag = false;
         }
     }
