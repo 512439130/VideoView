@@ -27,7 +27,7 @@
             android:src="@drawable/ic_seekbar_speed"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-             />
+            />
 
         <ImageView
             android:id="@+id/id_iv_rewind"

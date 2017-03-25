@@ -4,7 +4,7 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.media.AudioManager;
-import android.os.Build;
+
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -14,10 +14,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.ImageView;
+
 import android.widget.VideoView;
 
-import com.yy.videoview.R;
+
 import com.yy.videoview.VideoActivity;
 
 /**

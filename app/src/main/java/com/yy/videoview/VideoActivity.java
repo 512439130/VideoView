@@ -3,33 +3,26 @@ package com.yy.videoview;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.media.AudioManager;
+
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Message;
+
 import android.os.Bundle;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.MotionEvent;
+
+
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
+
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
+
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.yy.videoview.videoview.YyVideoView;
-
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class VideoActivity extends Activity{
@@ -228,11 +221,11 @@ public class VideoActivity extends Activity{
                     //变换开始按钮为暂停按钮
 
                     if (StartFlag) {   //点击了暂停按钮，变化为播放按钮
-                        startImageView.setImageResource(R.drawable.start);
+                        startImageView.setImageResource(R.drawable.ic_seekbar_start);
                         mVideoView.pause();
                         StartFlag = false;
                     } else {
-                        startImageView.setImageResource(R.drawable.pause);
+                        startImageView.setImageResource(R.drawable.ic_seekbar_pause);
                         StartFlag = true;
                         if (!StopFlag) {  //当停止按钮按下后
                             mVideoView.resume();
@@ -245,7 +238,7 @@ public class VideoActivity extends Activity{
                 case R.id.id_iv_stop:  //停止播放
                     System.out.println("停止播放");
                     //停止后改变图标
-                    startImageView.setImageResource(R.drawable.start);
+                    startImageView.setImageResource(R.drawable.ic_seekbar_start);
                     StartFlag = false;  //改变图标
                     StopFlag = false;
 
@@ -255,12 +248,12 @@ public class VideoActivity extends Activity{
                     break;
                 case R.id.id_iv_all:  //横屏/竖屏显示
                     if (ScreenFlag) {   //点击了暂停按钮，变化为播放按钮
-                        allImageView.setImageResource(R.drawable.all);
+                        allImageView.setImageResource(R.drawable.ic_seekbar_all);
                         ScreenFlag = false;
                         initLayout(false);  //改变视频为全屏
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);  //横屏
                     } else {
-                        allImageView.setImageResource(R.drawable.max);
+                        allImageView.setImageResource(R.drawable.ic_seekbar_max);
                         ScreenFlag = true;
                         initLayout(true);
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);  //竖屏
@@ -351,7 +344,7 @@ public class VideoActivity extends Activity{
             // 获得当前播放时间和当前视频的长度
             currentPosition = mVideoView.getCurrentPosition();
             duration = mVideoView.getDuration();
-            int time = 3;
+            int time = 0;
             time = ((currentPosition * 100) / duration) + time;
             // 设置进度条的主要进度，表示当前的播放时间
             mSeekBar.setProgress(time);

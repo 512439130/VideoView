@@ -4,7 +4,8 @@
     <item android:drawable="@drawable/ic_seekbar_burron_select" android:state_pressed="true" />
 
     <!-- 有焦点状态 -->
-    <item android:drawable="@drawable/ic_seekbar_burron" android:state_focused="true" />
+    <item android:drawable="@drawable/ic_seekbar_burron" android:state_pressed="false" />
+
 
     <!-- 普通状态 -->
     <item android:drawable="@drawable/ic_seekbar_burron" />
